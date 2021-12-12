@@ -29,6 +29,7 @@ $Commands = [PSCustomObject]@{
     # "handshake"           = " --algo Handshake --pers auto" #Handshake 
     "cuckaroo29bfc"    = " --algo bfc" #Cuckaroo29bfc
     "cuckarooz29"      = " --algo cuckarooz29" #Cuckarooz29
+    "cortex"           = " --algo cortex" #Cortex
 }
  
 $Port = $Variables.NVIDIAMinerAPITCPPort
@@ -43,6 +44,7 @@ $Commands.PSObject.Properties.Name | ForEach-Object {
         "ethash"	{0.65 / 100}
         "etchash"	{0.65 / 100}
         "kawpow"    {1 / 100}
+        "cortex"    {5 / 100}
         default     {2/100}
     }
 
@@ -64,7 +66,7 @@ $Commands.PSObject.Properties.Name | ForEach-Object {
             Type      = "NVIDIA"
             Path      = $Path
             Arguments = Merge-Command -Slave $Arguments -Master $CustomCmdAdds -Type "Command"
-            HashRates = [PSCustomObject]@{($AlgoNorm) = $Stats."$($Name)_$($AlgoNorm)_HashRate".Day * (1 - $fee)} # substract 2% devfee
+            HashRates = [PSCustomObject]@{($AlgoNorm) = $Stats."$($Name)_$($AlgoNorm)_HashRate".Day * (1 - $fee)} # substract devfee
             API       = "gminer"
             Port      = $Variables.NVIDIAMinerAPITCPPort
             Wrap      = $false
