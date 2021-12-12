@@ -13,7 +13,7 @@ $Commands = [PSCustomObject]@{
     "equihash144"  = " --algo 144,5 --pers auto --ocX " #Equihash144 (fastest)
     "equihash192"  = " --algo 192,7 --pers auto --ocX " #Equihash192 (fastest)
     "zhash"        = " --algo 144,5 --pers auto " #Zhash (fastest)
-    # "ethash"        = " --par ethash --ocX " #ethash 
+    "ethash"        = " --par ethash --ocX " #ethash 
     # "kawpow"        = " --par kawpow " #kawpow
     # "beam"         = " --algo 150,5 --pers auto" #Beam
     # "equihash96"   = " --algo 96,5  --pers auto --oc1 " #Equihash96 (ewbf faster)
@@ -31,6 +31,12 @@ $Commands.PSObject.Properties.Name | ForEach-Object {
         $Pool = $_
         invoke-Expression -command ( $MinerCustomConfigCode )
         If ($AbortCurrentPool) {Return}
+        
+        $fee = switch ($_){
+        "Progpow"   {0.01}
+        "etash"     {0.075}
+        default     {0.02}
+       }
 
         $Arguments = "--nohttpheaders --templimit 95 --intensity 100 --latency --tempunits C -cd $($Config.SelGPUDSTM) --telemetry $($Variables.NVIDIAMinerAPITCPPort) --url $($Pool.User).$($Config.WorkerName)@$($Pool.Host):$($Pool.Port) --pass $($Password)"
 
@@ -38,7 +44,7 @@ $Commands.PSObject.Properties.Name | ForEach-Object {
             Type      = "NVIDIA"
             Path      = $Path
             Arguments = Merge-Command -Slave $Arguments -Master $CustomCmdAdds -Type "Command"
-            HashRates = [PSCustomObject]@{($AlgoNorm) = $Stats."$($Name)_$($AlgoNorm)_HashRate".Week * .98} # substract 2% devfee
+            HashRates = [PSCustomObject]@{($AlgoNorm) = $Stats."$($Name)_$($AlgoNorm)_HashRate".Week * (1-$fee)} # substract devfee
             API       = "miniZ"
             Port      = $Variables.NVIDIAMinerAPITCPPort
             Wrap      = $false
